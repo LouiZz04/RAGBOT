@@ -1,187 +1,96 @@
-1/4
+# RAGBot with LangGraph
 
-# TD : Acoustique sous-marine et sonar latéral
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Powered-blue)](https://langchain-ai.github.io/langgraph/)
 
-## 1 Interprétation d’image
+This project implements a robust Retrieval-Augmented Generation (RAG) system using **LangGraph** and **LangChain**. It features a self-correcting pipeline that rephrases user queries, retrieves multimodal context (text, images, tables) from PDFs, and grades the relevance of retrieved documents before generating a final answer.
 
+## 🚀 Features
 
-La figure 1 représente un extrait d’une image sonar latéral. Cette image fait 492 pixels
-horizontallement et 489 pixels verticalement. Chaque pixel est un carré d’environ 20 cm de
-côté. On y observe l’épave de La Perle, chalutier école coulé en baie de Douarnenez en 1985.
+- **Multimodal PDF Ingestion**: Uses `unstructured` to partition PDFs into text, tables, and images.
+- **Image Analysis**: Uses **Llama-4-Scout** (via Groq) to describe images found in PDFs for better retrieval.
+- **Semantic Chunking**: Uses `SemanticChunker` with HuggingFace embeddings for intelligent text splitting.
+- **Self-Correcting RAG Pipeline**:
+    - **Query Rephrasing**: Optimizes user queries for vector search.
+    - **Relevance Grading**: Evaluates retrieved documents and loops back if they are irrelevant.
+    - **Hallucination Check**: Ensures answers are grounded in the retrieved context.
+- **Vector Store**: Uses **ChromaDB** for efficient similarity search.
 
+## 🛠️ Installation
 
-Figure 1 – Image 1
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd ragbot
+    ```
 
+2.  **Install dependencies**:
+    Ensure you have Python 3.13+ installed. You can install the required packages using pip:
 
-1. Décrire l’image et proposer des interprétations des éléments observés.
+    ```bash
+    pip install langchain langgraph langchain-groq langchain-huggingface langchain-chroma langchain-experimental unstructured[pdf] python-dotenv ipython
+    ```
 
-2. Pourquoi ne "voit"-on pas la coque de l’épave ? Faire un schéma.
+    *Note: You may need to install system dependencies for `unstructured` (e.g., `poppler-utils`, `tesseract-ocr`).*
 
+3.  **Set up Environment Variables**:
+    Create a `.env` file in the root directory and add your Groq API key:
 
-1
+    ```env
+    GROQ_API_KEY=your_groq_api_key_here
+    ```
 
+## 🧠 Architecture Graph
 
-2/4
+The system uses **LangGraph** to orchestrate the RAG flow. Below is the visualization of the control flow:
 
+![Graph Architecture](assets/graph_architecture.png)
 
-3. Quelle est l’altitude du sonar au dessus du fond ?
+### Flow Description:
+1.  **LLM1 Rephrase**: The user's input is rephrased into a keyword-heavy technical search query.
+2.  **RAG Search**: Retrieves the top 5 most similar documents (text chunks, image descriptions, tables) from ChromaDB.
+3.  **LLM2 Decision**: An LLM grades the retrieved documents. If they are relevant to the question, it proceeds. If not, it loops back to rephrase the query (up to 3 times).
+4.  **LLM3 Answer**: Generates a detailed, evidence-based engineering answer using *only* the retrieved context.
 
-4. Quelle est la longueur de l’épave ?
+### Flow Description:
+1.  **LLM1 Rephrase**: The user's input is rephrased into a keyword-heavy technical search query.
+2.  **RAG Search**: Retrieves the top 5 most similar documents (text chunks, image descriptions, tables) from ChromaDB.
+3.  **LLM2 Decision**: An LLM grades the retrieved documents. If they are relevant to the question, it proceeds. If not, it loops back to rephrase the query (up to 3 times).
+4.  **LLM3 Answer**: Generates a detailed, evidence-based engineering answer using *only* the retrieved context.
 
-5. Quelle est la hauteur de l’épave (maximale) ?
+## 💻 Usage
 
-6. En utilisant le pont avant de l’épave, calculer la largeur du bateau, et l’inclinaison de
-l’épave.
+1.  **Run the Main Notebook**:
+    Open `main.ipynb` in Jupyter Notebook or VS Code.
 
-## 2 Détection d’objet au sonar latéral
+2.  **Initialize RAG**:
+    Run the cells to initialize the graph. When prompted, enter the path to your PDF file.
+    ```python
+    # Example input
+    Enter pdf path: ./docs/manual.pdf
+    ```
+    This will process the PDF, extract content, describe images, and build the vector database in `./chroma_db_data`.
 
+3.  **Chat with your PDF**:
+    The system will enter a loop where you can ask questions.
+    ```text
+    Hi there, ask me something...
+    > What are the incertitude variables mentioned in section 5.1?
+    ```
 
-On suppose un sonar latéral dont l’antenne est utilisée à la fois en émission et en réception.
-Cette antenne est inclinée d’un angle φ0 avec l’horizontal, positif vers le bas. Une cible sphérique
-supposée ponctuelle et de rayon a = 0.5 m est posée sur un fond plat. Nous cherchons dans cet
-exercice à estimer si la cible peut être détectée par le sonar ou non.
-La hauteur d’eau est h = 200 m et l’altitude du sonar au dessus du fond est h0 = 30 m. La
-cible est à un range r = 300 m hors de l’axe du sonar.
+4.  **Exit**:
+    Type `q` to exit the chat loop.
 
+## 📂 File Structure
 
-Les caractéristiques du sonar sont les suivantes :
+- `main.ipynb`: The core application logic containing the LangGraph definition and execution loop.
+- `data_transformation.py`: Helper module for PDF partitioning, image description, and embedding generation.
+- `RAG.py`: A script for testing the RAG extraction logic independently.
+- `chroma_db_data/`: Directory where the vector database is persisted.
+- `temp_images/`: Temporary storage for extracted images from PDFs.
 
-  - Longueur de l’antenne : L = 2 m
+## 🤖 Models Used
 
-  - Largeur de l’antenne : l = 3 cm
-
-  - Inclinaison de l’antenne : φ0 = 5°
-
-  - Fréquence du signal émis : f = 100 kHz
-
-  - Bande du signal émis : B = 10 kHz
-
-  - Type de signal émis : chirp de durée τ = 10 ms
-
-  - Niveau d’émission : SL = 200 dB ref. 1µPa à 1 m, intégrant l’index de directivité
-
-  - Ouverture équivalente : Φ = 0.005 rad
-
-
-
-On utilisera :
-
- - pour la rétro-diffusion sur une sphère rigide, l’approximation géométrique (d >> λ)
-suivante :  
-
-
-
-TS = 10 log10
-
-
-
-
-a2
-
-
-
-4
-
-
-
-
-(1)
-
-
-
-avec d le diamètre de la sphère rigide, et a son rayon.
-
-  - pour la rétro-diffusion du fond, le modèle de Lambert suivant :
-
-
-BS = 10 + 20 log10(sin β) (2)
-                  
-avec β l’angle de rasance.
-
-  - pour la rétro-diffusion de surface, le modèle suivant :
-
-
-SR = 30 + 20 log10(sin β) (3)
-                  
-avec β l’angle de rasance.
-Lors des acquisitions avec le sonar, le vent a une vitesse nulle.
-
-1. Faire un schéma du problème.
-
-
-2
-
-
-3/4
-
-
-2. Pour évaluer si la cible est détectable, nous allons calculer le rapport signal sur bruit
-(RSB) de l’écho de la cible reçu par le sonar. En décibels on a :
-
-
-RSB = SIGNAL − BRUIT (4)
-
-(a) À quoi correspond le terme SIGNAL ?
-(b) Quels sont phénomènes considérés comme BRUIT ?
-(c) Une méthode de traitement du signal est utilisée ici pour améliorer ce rapport signal
-sur bruit. Quelle est cette méthode ?
-
-
-3. Écrire l’équation sonar permettant de calculer la partie SIGNAL (en décibels) du problème.
-
-4. Écrire les équations sonar permettant de calculer chacun des phénomènes de la partie
-BRUIT (en décibels).
-
-5. Donner les expressions des angles : de la cible avec l’horizontale (φc), de la surface avec
-l’horizontale (φs), et du fond marin avec l’horizontale (φf ), en fonction des hauteurs h
-et h0, de la distance oblique à la cible (range) r, et du rayon de la cible a.
-
-6. Calculer chacun des paramètres des équations sonar précédentes.
-
-7. Calculer le rapport signal sur bruit. La sphère est-elle détectable ?
-
-## 3 Annexes
-
-
-Fonction de directivité d’une antenne linéaire
-Pour une antenne de longueur L à la fréquence f on a :
-
-
-
-
-π [Lf]
-(θ) = [sin] c
-D π [Lf]
-
-
-
-c (5)
-
-c [sin(][θ][)]
-
-
-
-π [Lf]
-
-
-
-
-c [sin(][θ][)]
-
-
-
-Avec c la célérité des ondes acoustiques, et θ l’angle par rapport à l’axe de l’antenne.
-
-
-Index de directivité (ou gain d’antenne) d’une antenne rectangulaire
-Pour une antenne de longueur L et de largeur l à la fréquence f on a :
-
-
-DIRx = [4][π][(][L][ ·][ l][)] (6)
-
-λ [2]
-
-
-3
-
-
+- **LLM**: `llama-3.3-70b-versatile` (via Groq) for reasoning and answering.
+- **Vision LLM**: `meta-llama/llama-4-scout-17b-16e-instruct` (via Groq) for image description.
+- **Embeddings**: `paraphrase-multilingual-MiniLM-L12-v2` (via HuggingFace).
