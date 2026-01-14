@@ -20,8 +20,8 @@ This project implements a robust Retrieval-Augmented Generation (RAG) system usi
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
-    cd ragbot
+    git clone https://github.com/LouiZz04/RAGBOT.git
+    cd RAGBOT
     ```
 
 2.  **Install dependencies**:
@@ -86,8 +86,8 @@ The system uses **LangGraph** to orchestrate the RAG flow. Below is the visualiz
 - `main.ipynb`: The core application logic containing the LangGraph definition and execution loop.
 - `data_transformation.py`: Helper module for PDF partitioning, image description, and embedding generation.
 - `RAG.py`: A script for testing the RAG extraction logic independently.
-- `chroma_db_data/`: Directory where the vector database is persisted.
-- `temp_images/`: Temporary storage for extracted images from PDFs.
+- `chroma_db_data/`: Directory where the vector database is persisted(will be created when RAG is implemented by your pdf).
+- `temp_images/`: Temporary storage for extracted images from PDFs(same as chroma_db_data).
 
 ## 🤖 Models Used
 
