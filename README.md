@@ -25,10 +25,10 @@ This project implements a robust Retrieval-Augmented Generation (RAG) system usi
     ```
 
 2.  **Install dependencies**:
-    Ensure you have Python 3.13+ installed. You can install the required packages using pip:
+    Ensure you have Python 3.13+ and [UV](https://github.com/astral-sh/uv) installed. Install the required packages using UV:
 
     ```bash
-    pip install langchain langgraph langchain-groq langchain-huggingface langchain-chroma langchain-experimental unstructured[pdf] python-dotenv ipython
+    uv sync
     ```
 
     *Note: You may need to install system dependencies for `unstructured` (e.g., `poppler-utils`, `tesseract-ocr`).*
