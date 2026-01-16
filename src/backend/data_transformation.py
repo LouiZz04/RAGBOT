@@ -43,7 +43,7 @@ def data_transform(file: str):
         infer_table_structure=True,
         extract_images_in_pdf=True,
         #chunking_strategy="by_title",
-        extract_image_block_output_dir="./temp_images",
+        extract_image_block_output_dir="./data/temp_images",
         languages=["eng", "fra"],
     )
 
