@@ -6,3 +6,5 @@ chroma_db_data
 chroma.sqlite3
 CE_Ensta.pdf
 pdfs
+__pycache__/
+src/frontend/node_modules/
