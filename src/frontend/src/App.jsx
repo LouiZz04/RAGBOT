@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import "./App.css";
 
 const MAX_PDF_MB = 25;
@@ -201,7 +202,11 @@ export default function App() {
           {status === "ready" && !answer && (
             <div className="responseMuted">Ask a question to see the response.</div>
           )}
-          {!!answer && <div className="responseText">{answer}</div>}
+          {!!answer && (
+            <div className="responseText">
+              <ReactMarkdown>{answer}</ReactMarkdown>
+            </div>
+          )}
         </div>
       </section>
     </div>
