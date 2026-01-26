@@ -45,20 +45,51 @@ export default function App() {
     setAnswer("");
   }
 
-  function handleSend() {
+  async function handleSend() {
     if (!pdfFile) return;
 
     setStatus("processing");
     setAnswer("");
 
-    setTimeout(() => {
+    const formData = new FormData();
+    formData.append("files", pdfFile);
+
+    try {
+      const res = await fetch("http://localhost:8000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      console.log("Indexed:", data);
       setStatus("ready");
-    }, 2200);
+    } catch (err) {
+      console.error(err);
+      setStatus("selected"); // Go back to selected on error
+      alert("Error uploading file.");
+    }
   }
 
-  function handleAsk() {
+  async function handleAsk() {
     if (!canAsk || question.trim().length === 0) return;
-    setAnswer("Answer will appear here.");
+    setAnswer("Thinking...");
+
+    try {
+      // Note: Backend expects query param `question`
+      const res = await fetch(`http://localhost:8000/ask?question=${encodeURIComponent(question)}`, {
+        method: "POST"
+      });
+
+      if (!res.ok) throw new Error("Ask failed");
+
+      const data = await res.json();
+      setAnswer(data.answer);
+    } catch (err) {
+      console.error(err);
+      setAnswer("Error getting answer.");
+    }
   }
 
   return (
